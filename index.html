@@ -12,7 +12,7 @@
         
         .top-bar { background: #fff; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 100; }
         .logo { font-weight: 800; font-size: 18px; color: #000; display: flex; align-items: center; gap: 5px; }
-        .user-pill { background: #fff3cd; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; color: #856404; display: flex; align-items: center; gap: 4px; }
+        .user-pill { background: #fff3cd; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; color: #856404; }
         
         .container { padding: 14px; display: none; }
         .container.active { display: block; }
@@ -41,7 +41,7 @@
 <body>
     <div class="top-bar">
         <div class="logo">⚡ Blinkit Pro</div>
-        <div class="user-pill">👤 +91 8837810007</div>
+        <div class="user-pill" id="activeUser">👤 +91 8837810007</div>
     </div>
 
     <!-- LOGIN / ACCOUNTS TAB -->
@@ -51,11 +51,11 @@
                 <span>Add Account</span>
             </div>
             <div class="toggle-box">
-                <div class="toggle-btn active">📱 Number</div>
-                <div class="toggle-btn">🔑 Encrypted Key</div>
+                <div class="toggle-btn active" id="tabNum" onclick="setMode('num')">📱 Number</div>
+                <div class="toggle-btn" id="tabKey" onclick="setMode('key')">🔑 Encrypted Key</div>
             </div>
             <input type="tel" class="input-box" id="mobileNum" placeholder="Enter Mobile Number">
-            <button class="btn-primary" onclick="triggerOtp()">📤 Send OTP</button>
+            <button class="btn-primary" id="sendBtn" onclick="triggerOtp()">📤 Send OTP</button>
             <div id="otpSec" style="display:none; margin-top: 10px;">
                 <input type="number" class="input-box" id="otpVal" placeholder="Enter OTP">
                 <button class="btn-dark" onclick="verifyLogin()">Verify & Login</button>
@@ -63,10 +63,9 @@
         </div>
 
         <div class="card">
-            <div class="card-title">Saved Accounts <span style="font-size:11px; background:#eee; padding:2px 6px; border-radius:10px;">2</span></div>
+            <div class="card-title">Saved Accounts <span style="font-size:11px; background:#eee; padding:2px 6px; border-radius:10px;" id="accCount">1</span></div>
             <div id="accList">
                 <div class="account-item"><span>+91 8837810007</span> <span style="color:green; font-size:16px;">✓</span></div>
-                <div class="account-item" style="color:#777;"><span>+91 9988625261</span> <span style="font-size:16px;">○</span></div>
             </div>
         </div>
     </div>
@@ -81,7 +80,7 @@
         <div class="card">
             <div class="card-title">Addresses</div>
             <div style="font-size: 13px; background: #fafafa; padding: 10px; border-radius: 8px; border:1px solid #eee;">
-                <b>HOME</b> • Bharat (8837810007)<br><span style="color:#666; font-size:12px;">noji, Connaught Place, kroll bagh</span>
+                <b>HOME</b> • Bharat (8837810007)<br><span style="color:#666; font-size:12px;">Connaught Place, New Delhi</span>
             </div>
         </div>
     </div>
@@ -107,7 +106,7 @@
     <!-- PROFILE TAB -->
     <div class="container" id="profileTab">
         <div class="card">
-            <div class="card-title">👤 +91 8837810007</div>
+            <div class="card-title" id="profileNum">👤 +91 8837810007</div>
             <div style="font-size:12px; color:#555; margin-bottom:10px; background:#f5f5f5; padding:8px; border-radius:8px;">
                 Access Key: <b>6441744795</b>
             </div>
@@ -139,16 +138,38 @@
             element.classList.add('active');
         }
 
+        function setMode(mode) {
+            if(mode === 'num') {
+                document.getElementById('tabNum').classList.add('active');
+                document.getElementById('tabKey').classList.remove('active');
+                document.getElementById('mobileNum').placeholder = "Enter Mobile Number";
+            } else {
+                document.getElementById('tabKey').classList.add('active');
+                document.getElementById('tabNum').classList.remove('active');
+                document.getElementById('mobileNum').placeholder = "Enter Encrypted Key";
+            }
+        }
+
         function triggerOtp() {
-            const num = document.getElementById('mobileNum').value;
-            if(num.length < 10) { alert("Enter valid number!"); return; }
+            const val = document.getElementById('mobileNum').value;
+            if(!val) { alert("Please enter details!"); return; }
             document.getElementById('otpSec').style.display = 'block';
+            document.getElementById('sendBtn').innerText = "🔄 Resend OTP";
         }
 
         function verifyLogin() {
-            alert("Account Logged In Successfully!");
+            const val = document.getElementById('mobileNum').value;
+            alert("Login Successful!");
+            
+            document.getElementById('activeUser').innerText = "👤 +91 " + val;
+            document.getElementById('profileNum').innerText = "👤 +91 " + val;
+            
+            const accList = document.getElementById('accList');
+            accList.innerHTML += `<div class="account-item"><span>+91 ${val}</span> <span style="color:green; font-size:16px;">✓</span></div>`;
+            
             document.getElementById('otpSec').style.display = 'none';
             document.getElementById('mobileNum').value = '';
+            document.getElementById('sendBtn').innerText = "📤 Send OTP";
         }
     </script>
 </body>
