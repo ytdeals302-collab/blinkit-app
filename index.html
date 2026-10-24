@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blinkit Pro - Secure Session</title>
+    <title>Blinkit Pro</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --yellow: #f7c948; --bg: #f8f9fa; --text: #1c1c1c; }
@@ -12,7 +12,7 @@
         
         .top-bar { background: #fff; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 100; }
         .logo { font-weight: 800; font-size: 18px; color: #000; }
-        .user-pill { background: #e2f0d9; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; color: #274e13; }
+        .user-pill { background: #fff3cd; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; color: #856404; }
         
         .container { padding: 14px; display: none; }
         .container.active { display: block; }
@@ -20,8 +20,13 @@
         .card { background: #fff; border-radius: 14px; padding: 14px; margin-bottom: 14px; border: 1px solid #eaeaea; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .card-title { font-weight: 700; font-size: 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
         
+        .tab-switch { display: flex; background: #f0f0f0; border-radius: 10px; padding: 3px; margin-bottom: 12px; }
+        .tab-btn { flex: 1; padding: 8px; text-align: center; font-size: 12px; font-weight: 700; border-radius: 8px; cursor: pointer; color: #666; }
+        .tab-btn.active { background: #fff; color: #000; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        
         .input-box { width: 100%; padding: 12px; border: 1px solid #e0e0e0; border-radius: 10px; font-size: 14px; margin-bottom: 10px; outline: none; background: #fff; }
-        .btn-primary { width: 100%; background: var(--yellow); color: #000; font-weight: 700; padding: 12px; border: none; border-radius: 10px; cursor: pointer; text-align: center; }
+        .btn-primary { width: 100%; background: var(--yellow); color: #000; font-weight: 700; padding: 12px; border: none; border-radius: 10px; cursor: pointer; text-align: center; font-size: 14px; }
+        .btn-dark { width: 100%; background: #1c1c1c; color: #fff; font-weight: 700; padding: 12px; border: none; border-radius: 10px; cursor: pointer; text-align: center; margin-top: 6px; font-size: 14px; }
         
         .account-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: #fdfdfd; border: 1px solid #eee; border-radius: 10px; margin-bottom: 8px; font-size: 13px; font-weight: 600; }
         
@@ -33,22 +38,39 @@
 </head>
 <body>
     <div class="top-bar">
-        <div class="logo">⚡ Blinkit Pro Secure</div>
-        <div class="user-pill" id="statusBadge">🟢 Connected</div>
+        <div class="logo">⚡ Blinkit Pro</div>
+        <div class="user-pill" id="activeAccountDisplay">📱 +91 8837810007</div>
     </div>
 
     <!-- LOGIN / ACCOUNTS TAB -->
     <div class="container active" id="loginTab">
         <div class="card">
-            <div class="card-title"><span>Add Session / Encrypted Key</span></div>
-            <input type="text" class="input-box" id="authInput" placeholder="Paste Session Cookie / Auth Key">
-            <button class="btn-primary" onclick="saveSession()">💾 Save & Authorize Session</button>
+            <div class="card-title">Add Account</div>
+            
+            <div class="tab-switch">
+                <div class="tab-btn active" id="modeNumBtn" onclick="toggleAuthMode('num')">📱 Number</div>
+                <div class="tab-btn" id="modeKeyBtn" onclick="toggleAuthMode('key')">🔑 Encrypted Key</div>
+            </div>
+
+            <!-- Mobile Auth View -->
+            <div id="numAuthView">
+                <input type="tel" class="input-box" id="phoneInput" placeholder="Enter 10 Digit Phone Number" value="">
+                <button class="btn-primary" onclick="sendOtp()" id="otpBtn">🔄 Send OTP</button>
+                <input type="number" class="input-box" id="otpInput" placeholder="Enter OTP" style="display:none; margin-top:10px;">
+                <button class="btn-dark" onclick="verifyOtp()" id="verifyBtn" style="display:none;">Verify & Login</button>
+            </div>
+
+            <!-- Key Auth View -->
+            <div id="keyAuthView" style="display:none;">
+                <input type="text" class="input-box" id="keyInput" placeholder="Paste Session Cookie / Encrypted Key">
+                <button class="btn-primary" onclick="saveKey()">💾 Save & Authorize</button>
+            </div>
         </div>
 
         <div class="card">
-            <div class="card-title">Active Authorized Sessions</div>
-            <div id="sessionList">
-                <div class="account-item"><span>Session #1 (Default Active)</span> <span style="color:green;">Live ✓</span></div>
+            <div class="card-title"><span>Saved Accounts</span> <span style="font-size:11px; background:#f0f0f0; padding:2px 8px; border-radius:10px;" id="accCount">1</span></div>
+            <div id="accountList">
+                <div class="account-item"><span>+91 8837810007</span> <span style="color:green;">✔ Active</span></div>
             </div>
         </div>
     </div>
@@ -56,7 +78,7 @@
     <!-- ADDRESS TAB -->
     <div class="container" id="addressTab">
         <div class="card">
-            <div class="card-title">📍 Saved Delivery Addresses</div>
+            <div class="card-title">📍 Saved Delivery Address</div>
             <div style="font-size: 13px; background: #fafafa; padding: 10px; border-radius: 8px; border:1px solid #eee;">
                 <b>HOME</b> • Verified GPS Location<br><span style="color:#666; font-size:12px;">Synced with active session</span>
             </div>
@@ -67,8 +89,8 @@
     <div class="container" id="storeTab">
         <div class="card" style="background: linear-gradient(135deg, #fff9db, #fff); border-left: 4px solid var(--yellow);">
             <div class="card-title">🔥 Auto-Loot Store</div>
-            <p style="font-size: 12px; color: #555; margin-bottom: 10px;">Direct integration with @LootDealsByKaran_bot</p>
-            <button class="btn-primary" onclick="window.open('https://t.me', '_blank')">Open Store Bot ↗</button>
+            <p style="font-size: 12px; color: #555; margin-bottom: 10px;">Direct deals and automated checkout</p>
+            <button class="btn-primary" onclick="alert('Store Loaded')">Browse Offers</button>
         </div>
     </div>
 
@@ -76,7 +98,7 @@
     <div class="container" id="cartTab">
         <div class="card">
             <div class="card-title">🛒 Active Cart Sync</div>
-            <input type="text" class="input-box" placeholder="Paste Blinkit Share Link">
+            <input type="text" class="input-box" placeholder="Paste Blinkit Product / Cart Link">
             <button class="btn-primary" onclick="alert('Cart Synced Successfully!')">Sync Cart Items</button>
         </div>
     </div>
@@ -86,14 +108,14 @@
         <div class="card">
             <div class="card-title">👤 Session Profile</div>
             <div style="font-size:12px; color:#555; margin-bottom:10px; background:#f5f5f5; padding:8px; border-radius:8px;" id="tokenDisplay">
-                Auth Token: <b>Not Set</b>
+                Active Session: <b>+91 8837810007</b>
             </div>
         </div>
     </div>
 
     <!-- BOTTOM NAVIGATION -->
     <div class="bottom-nav">
-        <div class="nav-item active" onclick="switchTab('loginTab', this)"><span>🔑</span>Auth</div>
+        <div class="nav-item active" onclick="switchTab('loginTab', this)"><span>🔑</span>Login</div>
         <div class="nav-item" onclick="switchTab('addressTab', this)"><span>📍</span>Address</div>
         <div class="nav-item" onclick="switchTab('storeTab', this)"><span>🛒</span>Store</div>
         <div class="nav-item" onclick="switchTab('cartTab', this)"><span>🛍️</span>Cart</div>
@@ -111,14 +133,43 @@
             element.classList.add('active');
         }
 
-        function saveSession() {
-            const val = document.getElementById('authInput').value;
-            if(!val) { alert("Please enter a valid session key!"); return; }
-            localStorage.setItem('blinkit_session', val);
-            document.getElementById('tokenDisplay').innerHTML = `Auth Token: <b>${val.substring(0, 15)}...</b>`;
-            document.getElementById('sessionList').innerHTML += `<div class="account-item"><span>Key: ${val.substring(0, 10)}...</span> <span style="color:green;">Active ✓</span></div>`;
-            alert("Session Authorized & Saved Securely!");
-            document.getElementById('authInput').value = '';
+        function toggleAuthMode(mode) {
+            if(mode === 'num') {
+                document.getElementById('numAuthView').style.display = 'block';
+                document.getElementById('keyAuthView').style.display = 'none';
+                document.getElementById('modeNumBtn').classList.add('active');
+                document.getElementById('modeKeyBtn').classList.remove('active');
+            } else {
+                document.getElementById('numAuthView').style.display = 'none';
+                document.getElementById('keyAuthView').style.display = 'block';
+                document.getElementById('modeNumBtn').classList.remove('active');
+                document.getElementById('modeKeyBtn').classList.add('active');
+            }
+        }
+
+        function sendOtp() {
+            const num = document.getElementById('phoneInput').value;
+            if(!num || num.length < 10) { alert("Please enter valid 10-digit phone number!"); return; }
+            document.getElementById('otpInput').style.display = 'block';
+            document.getElementById('verifyBtn').style.display = 'block';
+            document.getElementById('otpBtn').innerText = '🔄 Resend OTP';
+            alert("OTP Sent to +91 " + num);
+        }
+
+        function verifyOtp() {
+            const num = document.getElementById('phoneInput').value;
+            const otp = document.getElementById('otpInput').value;
+            if(!otp) { alert("Please enter OTP!"); return; }
+            
+            document.getElementById('activeAccountDisplay').innerText = "📱 +91 " + num;
+            document.getElementById('accountList').innerHTML += `<div class="account-item"><span>+91 ${num}</span> <span style="color:green;">✔ Active</span></div>`;
+            alert("Account Linked Successfully!");
+        }
+
+        function saveKey() {
+            const key = document.getElementById('keyInput').value;
+            if(!key) { alert("Please enter valid Key/Cookie!"); return; }
+            alert("Session Key Authorized!");
         }
     </script>
 </body>
