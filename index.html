@@ -6,53 +6,67 @@
     <title>Blinkit Pro</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --yellow: #f7c948; --bg: #f5f6f8; --text: #1c1c1c; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
-        body { background: var(--bg); color: var(--text); padding-bottom: 75px; }
-        .top-bar { background: #fff; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; }
-        .logo { font-weight: 800; font-size: 18px; color: #000; }
-        .container { padding: 16px; display: none; }
+        :root { --yellow: #f7c948; --bg: #f8f9fa; --text: #1c1c1c; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: var(--bg); color: var(--text); padding-bottom: 70px; }
+        
+        .top-bar { background: #fff; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 100; }
+        .logo { font-weight: 800; font-size: 18px; color: #000; display: flex; align-items: center; gap: 5px; }
+        .user-pill { background: #fff3cd; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; color: #856404; display: flex; align-items: center; gap: 4px; }
+        
+        .container { padding: 14px; display: none; }
         .container.active { display: block; }
-        .card { background: #fff; border-radius: 16px; padding: 16px; margin-bottom: 16px; border: 1px solid #eaeaea; }
-        .card-title { font-weight: 700; font-size: 15px; margin-bottom: 12px; }
-        .input-box { width: 100%; padding: 12px; border: 1px solid #e0e0e0; border-radius: 10px; font-size: 14px; margin-bottom: 12px; outline: none; }
-        .btn-primary { width: 100%; background: var(--yellow); color: #000; font-weight: 700; padding: 12px; border: none; border-radius: 10px; cursor: pointer; margin-bottom: 8px; }
+        
+        .card { background: #fff; border-radius: 14px; padding: 14px; margin-bottom: 14px; border: 1px solid #eaeaea; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .card-title { font-weight: 700; font-size: 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        
+        .input-box { width: 100%; padding: 12px; border: 1px solid #e0e0e0; border-radius: 10px; font-size: 14px; margin-bottom: 10px; outline: none; background: #fff; }
+        .btn-primary { width: 100%; background: var(--yellow); color: #000; font-weight: 700; padding: 12px; border: none; border-radius: 10px; cursor: pointer; text-align: center; }
         .btn-dark { width: 100%; background: #222; color: #fff; font-weight: 700; padding: 12px; border: none; border-radius: 10px; cursor: pointer; }
-        .account-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f9f9f9; border-radius: 8px; margin-bottom: 8px; font-size: 13px; font-weight: 600; }
-        .status-msg { font-size: 13px; font-weight: bold; color: green; margin-bottom: 10px; display: none; }
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #e0e0e0; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #888; font-size: 12px; cursor: pointer; font-weight: 600; }
+        
+        .toggle-box { display: flex; background: #eee; border-radius: 8px; padding: 3px; margin-bottom: 12px; }
+        .toggle-btn { flex: 1; text-align: center; padding: 8px; font-size: 12px; font-weight: 700; border-radius: 6px; cursor: pointer; color: #666; }
+        .toggle-btn.active { background: #fff; color: #000; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+        .account-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: #fdfdfd; border: 1px solid #eee; border-radius: 10px; margin-bottom: 8px; font-size: 13px; font-weight: 600; }
+        
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; display: flex; justify-content: space-around; padding: 8px 0; border-top: 1px solid #e0e0e0; z-index: 100; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #888; font-size: 11px; cursor: pointer; font-weight: 600; gap: 2px; }
         .nav-item.active { color: #d49f00; }
+        .nav-item span { font-size: 18px; }
+        
+        .order-card { background: #fff; border: 1px solid #e2f0d9; border-radius: 10px; padding: 10px; margin-bottom: 8px; font-size: 12px; }
     </style>
 </head>
 <body>
     <div class="top-bar">
         <div class="logo">⚡ Blinkit Pro</div>
-        <div style="font-size: 12px; font-weight: bold; background: #eef; padding: 4px 8px; border-radius: 12px;">Multi-Acc Active</div>
+        <div class="user-pill">👤 +91 8837810007</div>
     </div>
 
-    <!-- ACCOUNTS & LOGIN TAB -->
+    <!-- LOGIN / ACCOUNTS TAB -->
     <div class="container active" id="loginTab">
         <div class="card">
-            <div class="card-title">👥 Connected Accounts</div>
-            <div id="accountsList">
-                <div class="account-item"><span>+91 Demo Account</span> <span style="color:green;">Active</span></div>
+            <div class="card-title">
+                <span>Add Account</span>
+            </div>
+            <div class="toggle-box">
+                <div class="toggle-btn active">📱 Number</div>
+                <div class="toggle-btn">🔑 Encrypted Key</div>
+            </div>
+            <input type="tel" class="input-box" id="mobileNum" placeholder="Enter Mobile Number">
+            <button class="btn-primary" onclick="triggerOtp()">📤 Send OTP</button>
+            <div id="otpSec" style="display:none; margin-top: 10px;">
+                <input type="number" class="input-box" id="otpVal" placeholder="Enter OTP">
+                <button class="btn-dark" onclick="verifyLogin()">Verify & Login</button>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-title">🔑 Add Account</div>
-            
-            <div class="status-msg" id="statusAlert">✅ Account Logged In Successfully!</div>
-
-            <!-- Mobile Input -->
-            <input type="tel" class="input-box" id="mobileNum" placeholder="Enter Mobile Number">
-            <button class="btn-primary" id="btnSendOtp" onclick="showOtpInput()">Send OTP</button>
-
-            <!-- OTP Input -->
-            <div id="otpBox" style="display: none; margin-top: 12px;">
-                <input type="number" class="input-box" id="otpVal" placeholder="Enter OTP">
-                <button class="btn-dark" onclick="submitLogin()">Verify & Login</button>
+            <div class="card-title">Saved Accounts <span style="font-size:11px; background:#eee; padding:2px 6px; border-radius:10px;">2</span></div>
+            <div id="accList">
+                <div class="account-item"><span>+91 8837810007</span> <span style="color:green; font-size:16px;">✓</span></div>
+                <div class="account-item" style="color:#777;"><span>+91 9988625261</span> <span style="font-size:16px;">○</span></div>
             </div>
         </div>
     </div>
@@ -60,25 +74,58 @@
     <!-- ADDRESS TAB -->
     <div class="container" id="addressTab">
         <div class="card">
-            <div class="card-title">📍 Add Address Link</div>
-            <input type="text" class="input-box" id="addrLink" placeholder="https://link.blinkit.com/...">
-            <button class="btn-primary" onclick="alert('Address Saved Successfully!')">Save Shared Address</button>
+            <div class="card-title">📍 Add Address from Link</div>
+            <input type="text" class="input-box" placeholder="https://link.blinkit.com/bln/...">
+            <button class="btn-primary" onclick="alert('Address Saved Successfully!')">💾 Save Shared Address</button>
+        </div>
+        <div class="card">
+            <div class="card-title">Addresses</div>
+            <div style="font-size: 13px; background: #fafafa; padding: 10px; border-radius: 8px; border:1px solid #eee;">
+                <b>HOME</b> • Bharat (8837810007)<br><span style="color:#666; font-size:12px;">noji, Connaught Place, kroll bagh</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- STORE TAB -->
+    <div class="container" id="storeTab">
+        <div class="card" style="background: linear-gradient(135deg, #fff9db, #fff); border-left: 4px solid var(--yellow);">
+            <div class="card-title">🔥 24/7 AUTO</div>
+            <p style="font-size: 12px; color: #555; margin-bottom: 10px;">Buy coupons, readymade accounts & many more</p>
+            <button class="btn-primary" onclick="window.open('https://t.me', '_blank')">Open Store Bot ↗</button>
         </div>
     </div>
 
     <!-- CART TAB -->
     <div class="container" id="cartTab">
         <div class="card">
-            <div class="card-title">🛒 Add Items Link</div>
-            <input type="text" class="input-box" id="cartLink" placeholder="https://link.blinkit.com/cart...">
-            <button class="btn-primary" onclick="alert('Cart Items Added Successfully!')">Parse & Add Items</button>
+            <div class="card-title">🛒 Add Items from Link</div>
+            <input type="text" class="input-box" placeholder="https://link.blinkit.com/cart/...">
+            <button class="btn-primary" onclick="alert('Items Added to Cart!')">Parse & Add Items</button>
         </div>
     </div>
 
+    <!-- PROFILE TAB -->
+    <div class="container" id="profileTab">
+        <div class="card">
+            <div class="card-title">👤 +91 8837810007</div>
+            <div style="font-size:12px; color:#555; margin-bottom:10px; background:#f5f5f5; padding:8px; border-radius:8px;">
+                Access Key: <b>6441744795</b>
+            </div>
+            <div class="card-title" style="margin-top:15px;">📦 Order History</div>
+            <div class="order-card">
+                <b>🟢 #3925768441</b> • <span style="color:green;">ARRIVED IN 8 MINUTES</span><br>
+                <span style="color:#666;">Kurkure Masala Munch, Coconut • ₹158</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTTOM NAVIGATION -->
     <div class="bottom-nav">
-        <div class="nav-item active" onclick="switchTab('loginTab', this)">Accounts</div>
-        <div class="nav-item" onclick="switchTab('addressTab', this)">Address</div>
-        <div class="nav-item" onclick="switchTab('cartTab', this)">Cart</div>
+        <div class="nav-item active" onclick="switchTab('loginTab', this)"><span>🔑</span>Login</div>
+        <div class="nav-item" onclick="switchTab('addressTab', this)"><span>📍</span>Address</div>
+        <div class="nav-item" onclick="switchTab('storeTab', this)"><span>🛒</span>Store</div>
+        <div class="nav-item" onclick="switchTab('cartTab', this)"><span>🛍️</span>Cart</div>
+        <div class="nav-item" onclick="switchTab('profileTab', this)"><span>👤</span>Profile</div>
     </div>
 
     <script>
@@ -92,36 +139,16 @@
             element.classList.add('active');
         }
 
-        function showOtpInput() {
-            const phone = document.getElementById('mobileNum').value;
-            if(!phone || phone.length < 10) {
-                alert("Please enter valid mobile number!");
-                return;
-            }
-            document.getElementById('otpBox').style.display = 'block';
-            document.getElementById('btnSendOtp').innerText = 'Resend OTP';
+        function triggerOtp() {
+            const num = document.getElementById('mobileNum').value;
+            if(num.length < 10) { alert("Enter valid number!"); return; }
+            document.getElementById('otpSec').style.display = 'block';
         }
 
-        function submitLogin() {
-            const phone = document.getElementById('mobileNum').value;
-            const otp = document.getElementById('otpVal').value;
-            
-            if(!otp) {
-                alert("Please enter OTP!");
-                return;
-            }
-
-            const accList = document.getElementById('accountsList');
-            accList.innerHTML += `<div class="account-item"><span>+91 ${phone}</span> <span style="color:green;">Logged In</span></div>`;
-
-            const statusBox = document.getElementById('statusAlert');
-            statusBox.style.display = 'block';
-            setTimeout(() => { statusBox.style.display = 'none'; }, 3000);
-
+        function verifyLogin() {
+            alert("Account Logged In Successfully!");
+            document.getElementById('otpSec').style.display = 'none';
             document.getElementById('mobileNum').value = '';
-            document.getElementById('otpVal').value = '';
-            document.getElementById('otpBox').style.display = 'none';
-            document.getElementById('btnSendOtp').innerText = 'Send OTP';
         }
     </script>
 </body>
