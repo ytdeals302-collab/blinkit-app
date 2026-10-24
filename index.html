@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blinkit Pro</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root { --yellow: #f7c948; --bg: #f5f6f8; --text: #1c1c1c; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
+        body { background: var(--bg); color: var(--text); padding-bottom: 75px; }
+        .top-bar { background: #fff; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; }
+        .logo { font-weight: 800; font-size: 18px; color: #000; }
+        .container { padding: 16px; display: none; }
+        .container.active { display: block; }
+        .card { background: #fff; border-radius: 16px; padding: 16px; margin-bottom: 16px; border: 1px solid #eaeaea; }
+        .card-title { font-weight: 700; font-size: 15px; margin-bottom: 12px; }
+        .input-box { width: 100%; padding: 12px; border: 1px solid #e0e0e0; border-radius: 10px; font-size: 14px; margin-bottom: 12px; outline: none; }
+        .btn-primary { width: 100%; background: var(--yellow); color: #000; font-weight: 700; padding: 12px; border: none; border-radius: 10px; cursor: pointer; margin-bottom: 8px; }
+        .btn-dark { width: 100%; background: #222; color: #fff; font-weight: 700; padding: 12px; border: none; border-radius: 10px; cursor: pointer; }
+        .account-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f9f9f9; border-radius: 8px; margin-bottom: 8px; font-size: 13px; font-weight: 600; }
+        .status-msg { font-size: 13px; font-weight: bold; color: green; margin-bottom: 10px; display: none; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #e0e0e0; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #888; font-size: 12px; cursor: pointer; font-weight: 600; }
+        .nav-item.active { color: #d49f00; }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <div class="logo">⚡ Blinkit Pro</div>
+        <div style="font-size: 12px; font-weight: bold; background: #eef; padding: 4px 8px; border-radius: 12px;">Multi-Acc Active</div>
+    </div>
+
+    <!-- ACCOUNTS & LOGIN TAB -->
+    <div class="container active" id="loginTab">
+        <div class="card">
+            <div class="card-title">👥 Connected Accounts</div>
+            <div id="accountsList">
+                <div class="account-item"><span>+91 Demo Account</span> <span style="color:green;">Active</span></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">🔑 Add Account</div>
+            
+            <div class="status-msg" id="statusAlert">✅ Account Logged In Successfully!</div>
+
+            <!-- Mobile Input -->
+            <input type="tel" class="input-box" id="mobileNum" placeholder="Enter Mobile Number">
+            <button class="btn-primary" id="btnSendOtp" onclick="showOtpInput()">Send OTP</button>
+
+            <!-- OTP Input -->
+            <div id="otpBox" style="display: none; margin-top: 12px;">
+                <input type="number" class="input-box" id="otpVal" placeholder="Enter OTP">
+                <button class="btn-dark" onclick="submitLogin()">Verify & Login</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADDRESS TAB -->
+    <div class="container" id="addressTab">
+        <div class="card">
+            <div class="card-title">📍 Add Address Link</div>
+            <input type="text" class="input-box" id="addrLink" placeholder="https://link.blinkit.com/...">
+            <button class="btn-primary" onclick="alert('Address Saved Successfully!')">Save Shared Address</button>
+        </div>
+    </div>
+
+    <!-- CART TAB -->
+    <div class="container" id="cartTab">
+        <div class="card">
+            <div class="card-title">🛒 Add Items Link</div>
+            <input type="text" class="input-box" id="cartLink" placeholder="https://link.blinkit.com/cart...">
+            <button class="btn-primary" onclick="alert('Cart Items Added Successfully!')">Parse & Add Items</button>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('loginTab', this)">Accounts</div>
+        <div class="nav-item" onclick="switchTab('addressTab', this)">Address</div>
+        <div class="nav-item" onclick="switchTab('cartTab', this)">Cart</div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        function switchTab(tabId, element) {
+            document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            element.classList.add('active');
+        }
+
+        function showOtpInput() {
+            const phone = document.getElementById('mobileNum').value;
+            if(!phone || phone.length < 10) {
+                alert("Please enter valid mobile number!");
+                return;
+            }
+            document.getElementById('otpBox').style.display = 'block';
+            document.getElementById('btnSendOtp').innerText = 'Resend OTP';
+        }
+
+        function submitLogin() {
+            const phone = document.getElementById('mobileNum').value;
+            const otp = document.getElementById('otpVal').value;
+            
+            if(!otp) {
+                alert("Please enter OTP!");
+                return;
+            }
+
+            const accList = document.getElementById('accountsList');
+            accList.innerHTML += `<div class="account-item"><span>+91 ${phone}</span> <span style="color:green;">Logged In</span></div>`;
+
+            const statusBox = document.getElementById('statusAlert');
+            statusBox.style.display = 'block';
+            setTimeout(() => { statusBox.style.display = 'none'; }, 3000);
+
+            document.getElementById('mobileNum').value = '';
+            document.getElementById('otpVal').value = '';
+            document.getElementById('otpBox').style.display = 'none';
+            document.getElementById('btnSendOtp').innerText = 'Send OTP';
+        }
+    </script>
+</body>
+</html>
